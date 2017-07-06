@@ -1,0 +1,139 @@
+<meta charset="UTF-8">
+<html>
+	<head>
+		<title>Web PM</title>
+		<script language="javascript">
+chains=[];
+inspected_idx=null;
+
+function suit(card)
+{
+	return Math.floor(card/9);
+}
+
+function rank(card)
+{
+	return card%9;
+}
+
+function shuffled_chain(count)
+{
+	deck=[0];
+	for (var i=1; i<36; i++) {
+		random_pos=Math.floor(Math.random()*deck.length);
+		card=deck[random_pos];
+		deck[random_pos]=i;
+		deck.push(card);
+	}
+	return deck;
+}
+
+function converge(chain)
+{
+	for (var i=0; i<chain.length-2; i++) {
+		if (suit(chain[i])==suit(chain[i+2])
+				|| rank(chain[i])==rank(chain[i+2])) {
+			return converge(chain.slice(0, i).concat(
+				chain.slice(i+1)));
+		}
+	}
+	return chain;
+}
+
+function make_chain()
+{
+	for (var attempt=0; attempt<10000000; attempt++) {
+		var chain=shuffled_chain();
+		if (converge(chain).length==2) {
+			return chain;
+		}
+	}
+	return null;
+}
+
+function card_to_html(card)
+{
+	var repr=[
+		'6', '7', '8', '9', '10', 'В', 'Д', 'К', 'Т'
+	][rank(card)]+[ 'п', 'к', 'б', 'ч'
+	][suit(card)]
+	if (suit(card)>=2) {
+		repr='<font color="red">' + repr + '</font>'
+	}
+	return repr;
+}
+
+function chain_to_html(chain)
+{
+	if (chain==null) {
+		return 'n/a'
+	}
+	res='';
+	for (var i=0; i<chain.length; i++) {
+		res+=card_to_html(chain[i])+' ';
+	}
+
+	return res;
+}
+
+function generate()
+{
+	var count=parseInt(document.getElementById("gen_count").value);
+	if (isNaN(count)) {
+		count=1;
+		document.getElementById("gen_count").innerText="1";
+	}
+
+	for (var i=0; i<count; i++) {
+		chains.push(make_chain());
+	}
+	console.log("Generated");
+}
+
+function update_list()
+{
+	var html="";
+
+	for (var i=0; i<chains.length; i++) {
+		var line=(i+1)+'. ' + chain_to_html(chains[i]);
+		if (i==inspected_idx) {
+			line="<b>"+line+"</b> &mdash; <i>inspected</i><br/>";
+		} else {
+			line+=' <span style="cursor: pointer" onclick="inspect(' + i + ');">inspect</span><br/>';
+		}
+		html+=line;
+	}
+
+	document.getElementById("chains_list").innerHTML=html;
+}
+
+function inspect(num)
+{
+	var inspected=document.getElementById("inspected");
+	if (num>=chains.length) {
+		inspected.innerHTML="<i>n/a</i>";
+		inspected_idx=null;
+	}
+	else {
+		inspected.innerHTML=chain_to_html(chains[num]);
+		inspected_idx=num;
+	}
+	update_list();
+}
+		</script>
+	</head>
+	<body onload="generate();inspect(0);">
+		<h1>Пасьянс Медичи</h1>
+		<h2>Анализатор</h2>
+			ЦС: <div
+				id="inspected"
+				style="border-style: dotted; font-weight: thick; font-family: arial; font-size: large"
+				></div>
+		<h2>Генератор</h2>
+		<input id="pattern" value="*" />
+		<button onclick="generate();update_list();">Генерировать</button>
+		<input id="gen_count" value="5" style="width: 30px;" />
+		штук
+		<div id="chains_list"></div>
+	</body>
+</html>
