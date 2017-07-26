@@ -3,32 +3,38 @@
 	<head>
 		<title>Web PM</title>
 		<script language="javascript">
+RANKS=9; // Number of card ranks, 9 for 36 cards deck (6, 7, 8, 9, 10, J, Q, K and A)
+SUITS=4; // Number of card suits, 4 for 36 cards deck (Spades, Clubs, Diamods and Hearts)
+
 chains=[];
 inspected_idx=null;
 
 function suit(card)
 {
-	return Math.floor(card/9);
+	return Math.floor(card/RANKS);
 }
 
 function rank(card)
 {
-	return card%9;
+	return card%RANKS;
 }
 
 function shuffled_chain(count)
+	// Generate a randomly shuffled chain (full deck)
 {
-	deck=[0];
-	for (var i=1; i<36; i++) {
-		random_pos=Math.floor(Math.random()*deck.length);
-		card=deck[random_pos];
-		deck[random_pos]=i;
-		deck.push(card);
+	var chain=[0];
+	for (var i=1; i<RANKS*SUITS; i++) {
+		random_pos=Math.floor(Math.random()*chain.length);
+		card=chain[random_pos];
+		chain[random_pos]=i;
+		chain.push(card);
 	}
-	return deck;
+	return chain;
 }
 
 function converge(chain)
+	// Try to converge the chain according to PM rules
+	// Returns the converged chain
 {
 	for (var i=0; i<chain.length-2; i++) {
 		if (suit(chain[i])==suit(chain[i+2])
@@ -41,6 +47,7 @@ function converge(chain)
 }
 
 function make_chain()
+	// Make some attempts to generate a satisfactory chain
 {
 	for (var attempt=0; attempt<10000000; attempt++) {
 		var chain=shuffled_chain();
