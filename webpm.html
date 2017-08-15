@@ -20,15 +20,35 @@ SUITS=4; // Number of card suits, 4 for 36 cards deck (Spades, Clubs, Diamods an
 
 function ChainView(chain)
 {
-	return 'ЦС: ' + chain_to_html(chain)+'<br/>';
+	return 'ЦС: ' + chain_to_html(chain);
 }
 
-function Convergence(chain)
+function ConvergenceInfo(chain)
 {
-	return 'Сходится: ' + (converge(chain).length==2? 'ДА': 'НЕТ') + '<br/>';
+	return 'Сходится: ' + (converge(chain).length==2? 'ДА': 'НЕТ');
 }
 
-INSPECTORS=[ChainView, Convergence];
+INSPECTORS=[ChainView, ConvergenceInfo];
+
+
+// -----------
+// CONSTRAINTS
+// -----------
+
+function Convergence()
+{
+	this.getCaption = function()
+	{
+		return 'Сходимость';
+	}
+
+	this.getParams = function()
+	{
+		return '<input type="checkbox" checked="checked" /> ЦС должна сходиться';
+	}
+}
+
+CONSTRAINTS=[Convergence];
 
 chains=[];
 inspected_idx=null;
@@ -156,7 +176,7 @@ function inspect(num)
 
 	inspectors.innerHTML='';
 	for (var i=0; i<INSPECTORS.length; i++) {
-		inspectors.innerHTML+=INSPECTORS[i](chains[inspected_idx]);
+		inspectors.innerHTML+='<div>'+INSPECTORS[i](chains[inspected_idx])+'</div>';
 	}
 }
 		</script>
@@ -170,6 +190,8 @@ function inspect(num)
 		<button onclick="generate();update_list();">Генерировать</button>
 		<input id="gen_count" value="5" style="width: 30px;" />
 		штук
+		<h2>Цепочки:</h2>
+
 		<div id="chains_list"></div>
 	</body>
 </html>
