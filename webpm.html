@@ -3,8 +3,32 @@
 	<head>
 		<title>Web PM</title>
 		<script language="javascript">
+
+// ------------
+// BASIC CONFIG
+// ------------
 RANKS=9; // Number of card ranks, 9 for 36 cards deck (6, 7, 8, 9, 10, J, Q, K and A)
 SUITS=4; // Number of card suits, 4 for 36 cards deck (Spades, Clubs, Diamods and Hearts)
+
+// ----------
+// INSPECTORS
+// ----------
+// Inspector is a function, that takes a chain as input and produces some
+// info about the chain (as HTML). To enable inspector, add it to the INSPECTORS
+// array. Info from inspectors is shown in order, in which they appear in the
+// INSPECTORS array.
+
+function ChainView(chain)
+{
+	return 'ЦС: ' + chain_to_html(chain)+'<br/>';
+}
+
+function Convergence(chain)
+{
+	return 'Сходится: ' + (converge(chain).length==2? 'ДА': 'НЕТ') + '<br/>';
+}
+
+INSPECTORS=[ChainView, Convergence];
 
 chains=[];
 inspected_idx=null;
@@ -116,26 +140,31 @@ function update_list()
 
 function inspect(num)
 {
-	var inspected=document.getElementById("inspected");
 	if (num>=chains.length) {
-		inspected.innerHTML="<i>n/a</i>";
 		inspected_idx=null;
 	}
 	else {
-		inspected.innerHTML=chain_to_html(chains[num]);
 		inspected_idx=num;
 	}
 	update_list();
+
+	if (inspected_idx==null) {
+		return;
+	}
+
+	var inspectors=document.getElementById("inspectors");
+
+	inspectors.innerHTML='';
+	for (var i=0; i<INSPECTORS.length; i++) {
+		inspectors.innerHTML+=INSPECTORS[i](chains[inspected_idx]);
+	}
 }
 		</script>
 	</head>
 	<body onload="generate();inspect(0);">
 		<h1>Пасьянс Медичи</h1>
 		<h2>Анализатор</h2>
-			ЦС: <div
-				id="inspected"
-				style="border-style: dotted; font-weight: thick; font-family: arial; font-size: large"
-				></div>
+				<div id="inspectors"></div>
 		<h2>Генератор</h2>
 		<input id="pattern" value="*" />
 		<button onclick="generate();update_list();">Генерировать</button>
